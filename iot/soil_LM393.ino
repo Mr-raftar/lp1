@@ -12,24 +12,23 @@ const char* writeAPIKey = "XC5V1GOMDRFW4DB9";
 // WiFi client for ThingSpeak
 WiFiClient client;
 
-// ----------------------- Sensor Pin -----------------------
-const int soilMoisturePin = A0;   // Analog pin connected to soil moisture sensor
+// ----------------------- Soil Moisture Sensor -----------------------
+const int soilMoisturePin = A0;   // Analog output (AO) from LM393 module
 
 /*
-    PIN DIAGRAM (ESP8266 with Soil Moisture Sensor)
+    PIN CONNECTION DIAGRAM
 
-           +-----------------+
-           |     ESP8266     |
-           |                 |
-   3.3V ---| VIN         A0 |--- Analog Output (Sensor)
-   GND ----| GND          D0|
-   D1 ----|                |
-           +----------------+
+    ESP8266 NodeMCU        LM393 Soil Moisture Sensor Module
+    ----------------       ----------------------
+    3.3V    --------------> VCC       (Power supply)
+    GND     --------------> GND       (Ground)
+    A0      --------------> AO        (Analog output to measure moisture)
+    D1      --------------> DO        (Optional digital output for wet/dry, if used)
 
-    Soil Moisture Sensor Pins:
-    - VCC → 3.3V of ESP8266
-    - GND → GND of ESP8266
-    - AO  → A0 (Analog input) of ESP8266
+    Soil Probe ----------> LM393 module probe pins (+ and -)
+    - Insert probe into soil
+    - AO reads voltage proportional to soil moisture
+    - DO gives HIGH/LOW if threshold is reached (adjustable by potentiometer)
 */
 
 // ----------------------- Setup -----------------------
@@ -56,7 +55,8 @@ void loop() {
   int sensorValue = analogRead(soilMoisturePin);
 
   // Convert analog value to percentage
-  int moisturePercent = map(sensorValue, 1024, 346, 0, 100);  // Adjust 346 based on your sensor calibration
+  // Adjust 1024 and 346 based on calibration for dry and wet soil
+  int moisturePercent = map(sensorValue, 1024, 346, 0, 100);
   moisturePercent = constrain(moisturePercent, 0, 100);
 
   // Print values to Serial Monitor
@@ -76,6 +76,6 @@ void loop() {
     Serial.println(response);
   }
 
-  // Wait 15 seconds before next reading
+  // Wait 15 seconds before next reading (ThingSpeak rate limit)
   delay(15000);
 }
