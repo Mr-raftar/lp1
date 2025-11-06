@@ -1,61 +1,60 @@
-// C++ (Arduino) Code with Pin Connection Comments
-#include <Servo.h>
+#include <Servo.h>  // Include Servo library to control servo motor
 
 // ----------------------
-// PIN CONNECTIONS:
+// PIN CONNECTIONS
 // ----------------------
 // Servo Motor:
-//   Signal -> Pin 7
+//   Signal -> Pin 6
 //   VCC    -> 5V
 //   GND    -> GND
 //
-// Ultrasonic Sensor (3-pin type):
-//   SIG    -> Pin 6
+// Ultrasonic Sensor (4-pin HC-SR04):
 //   VCC    -> 5V
 //   GND    -> GND
+//   TRIG   -> Pin 7
+//   ECHO   -> Pin 8
 // ----------------------
 
-Servo servo7; // Servo object
+Servo servo_6;  // Create a Servo object to control servo motor
+int v_dist = 0; // Variable to store measured distance (in cm)
 
-int vir_dist = 0; // Variable to store calculated distance
+// Function to read distance from 4-pin ultrasonic sensor
+long readUltrasonicDistance(int trigPin, int echoPin) {
+  pinMode(trigPin, OUTPUT);     // Set trigger pin as output
+  digitalWrite(trigPin, LOW);   // Ensure trigger pin is LOW
+  delayMicroseconds(2);         // Short delay to stabilize sensor
 
-// Function to read ultrasonic sensor distance
-long readUltrasonicDistance(int triggerPin, int echoPin) {
-  pinMode(triggerPin, OUTPUT); // Set trigger pin as output
-  digitalWrite(triggerPin, LOW);
-  delayMicroseconds(2);
-
-  // Send a 10 microsecond pulse
-  digitalWrite(triggerPin, HIGH);
+  digitalWrite(trigPin, HIGH);  // Send a HIGH pulse for 10 microseconds
   delayMicroseconds(10);
-  digitalWrite(triggerPin, LOW);
+  digitalWrite(trigPin, LOW);   // Stop the pulse
 
-  pinMode(echoPin, INPUT);
-  // Measure the time it takes for the echo to return
-  return pulseIn(echoPin, HIGH);
+  pinMode(echoPin, INPUT);      // Set echo pin as input to read the return pulse
+  long duration = pulseIn(echoPin, HIGH); // Measure the time of the returned pulse in microseconds
+
+  // Convert duration to distance in cm
+  long distance = duration * 0.0343 / 2; // Speed of sound formula: distance = (time * 343 m/s)/2
+  return distance; // Return distance in cm
 }
 
 void setup() {
-  servo7.attach(7, 500, 2500); // Attach servo to pin 7 with limits
-  Serial.begin(9600);          // Start serial monitor
+  servo_6.attach(6, 500, 2500); // Attach servo motor to Pin 6 with min/max pulse width
+  Serial.begin(9600);            // Initialize serial monitor for debugging
 }
 
 void loop() {
-  servo7.write(90); // Set servo position to 90 degrees
+  // Read distance from ultrasonic sensor (TRIG=7, ECHO=8)
+  v_dist = readUltrasonicDistance(7, 8);
 
-  // Read distance from ultrasonic sensor on pin 6 (3-pin sensor)
-  vir_dist = 0.01723 * readUltrasonicDistance(6, 6);
-
-  // Print distance to serial monitor
+  // Print measured distance to Serial Monitor
   Serial.print("Distance (cm): ");
-  Serial.println(vir_dist);
+  Serial.println(v_dist);
 
-  // Example: Move servo if object is detected farther than 100 cm
-  if (vir_dist >= 100) {
-    servo7.write(0);
-  } else {
-    servo7.write(90);
+  // Control servo based on distance
+  if (v_dist <= 100) {           // If object is closer than 100 cm
+    servo_6.write(180);          // Move servo to 180 degrees
+  } else {                        // If object is farther than 100 cm
+    servo_6.write(90);           // Keep servo at 90 degrees
   }
 
-  delay(500); // small delay for stability
+  delay(200);                     // Small delay for stability and to avoid rapid servo movement
 }
