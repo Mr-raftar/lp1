@@ -7,6 +7,7 @@ from sklearn.cluster import KMeans
 
 # Load dataset
 mall_data = pd.read_csv("C:/Users/Prathmesh/OneDrive/Desktop/LP/CSV File/Mall_Customers.csv")
+#mall_data = pd.read_csv("/home/avcoe/Mall_Customers.csv")
 
 # Display first rows
 print(mall_data.head())
