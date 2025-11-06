@@ -4,7 +4,6 @@ import seaborn as sns
 sns.set_style("whitegrid")
 plt.style.use("fivethirtyeight")
 
-#df = pd.read_csv("Admission_Predict.csv") #keep csv in same folder of code
 df = pd.read_csv(r"C:\Users\Hp\OneDrive\Desktop\lp-1\Admission_Predict.csv")
 #df = pd.read_csv("/home/avcoe/Admission_Predict.csv") for ubuntu
 df.head()
@@ -121,3 +120,4 @@ print("Testing Accuracy (%):", accuracy_score(y_test, tree_clf.predict(X_test)) 
 # - Replace 'target' with the actual name of your dependent variable column (e.g., 'Chance of Admit').
 # - You can run each section in Spyder using F9.
 # -----------------------------------------------------------
+
