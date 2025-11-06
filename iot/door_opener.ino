@@ -58,3 +58,65 @@ void loop() {
 
   delay(200);                     // Small delay for stability and to avoid rapid servo movement
 }
+
+
+
+//for 3 pin sensor 
+
+
+#include <Servo.h>
+
+// ----------------------
+// PIN CONNECTIONS
+// ----------------------
+// Servo Motor:
+//   Signal -> Pin 6
+//   VCC    -> 5V
+//   GND    -> GND
+//
+// Ultrasonic Sensor (3-pin):
+//   SIG    -> Pin 7  (Trigger + Echo)
+//   VCC    -> 5V
+//   GND    -> GND
+// ----------------------
+
+Servo servo_6;  // Servo object
+int v_dist = 0; // Variable to store distance
+
+// Function to read distance from 3-pin ultrasonic sensor
+long readUltrasonicDistance(int sigPin) {
+  pinMode(sigPin, OUTPUT);    // Set SIG as output to send pulse
+  digitalWrite(sigPin, LOW);  // Clear pulse
+  delayMicroseconds(2);
+
+  digitalWrite(sigPin, HIGH); // Send 10 us pulse
+  delayMicroseconds(10);
+  digitalWrite(sigPin, LOW);
+
+  pinMode(sigPin, INPUT);     // Read echo on the same pin
+  long duration = pulseIn(sigPin, HIGH); // Measure time for echo
+
+  // Convert duration to distance in cm
+  long distance = duration * 0.0343 / 2;
+  return distance;
+}
+
+void setup() {
+  servo_6.attach(6, 500, 2500); // Attach servo
+  Serial.begin(9600);           // Initialize serial monitor
+}
+
+void loop() {
+  v_dist = readUltrasonicDistance(7);  // Read distance from 3-pin sensor
+
+  Serial.print("Distance (cm): ");
+  Serial.println(v_dist);
+
+  if (v_dist <= 100) {        // Move servo if object is close
+    servo_6.write(180);
+  } else {
+    servo_6.write(90);
+  }
+
+  delay(200);                 // Small delay for stability
+}
